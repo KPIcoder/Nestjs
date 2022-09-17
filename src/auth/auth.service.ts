@@ -7,11 +7,13 @@ import {ITokens} from "./auth.interfaces";
 import {CreateUserDto} from "../user/dto/createUser.dto";
 import {UserService} from "../user/user.service";
 import {LoginUser} from "../user/dto/loginUser.dto";
+import {EmailService} from "../email/email.service";
 
 @Injectable()
 export class AuthService {
     constructor(private jwtService: JwtService,
-                private userService: UserService) {}
+                private userService: UserService,
+                private emailService: EmailService) {}
 
     async register(user: CreateUserDto): Promise<User> {
 
@@ -20,6 +22,8 @@ export class AuthService {
 
         const hashedPassword = await bcrypt.hash(user.password, 7)
         user = {...user, password: hashedPassword,};
+
+        await this.emailService.sendMail(user.email, user.username);
 
         return this.userService.createUser(user);
     }
